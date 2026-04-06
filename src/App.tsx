@@ -121,6 +121,10 @@ export default function App() {
   const [view, setView] = useState<'home' | 'admin'>('home');
   const [adminTab, setAdminTab] = useState<'registrations' | 'settings'>('registrations');
   const [showLogin, setShowLogin] = useState(false);
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [settings, setSettings] = useState<AppSettings>({
@@ -199,17 +203,24 @@ export default function App() {
     };
   }, []);
 
-  const handleLogin = async () => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError(null);
+    setIsLoggingIn(true);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin
-        }
+      const { error } = await supabase.auth.signInWithPassword({
+        email: loginEmail,
+        password: loginPassword,
       });
       if (error) throw error;
-    } catch (error) {
+      setShowLogin(false);
+      setLoginEmail('');
+      setLoginPassword('');
+    } catch (error: any) {
       console.error("Login failed:", error);
+      setLoginError(error.message || "লগইন ব্যর্থ হয়েছে। অনুগ্রহ করে সঠিক তথ্য দিন।");
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
@@ -327,13 +338,52 @@ export default function App() {
                 <p className="text-slate-500 mt-2">শুধুমাত্র এডমিনদের জন্য</p>
               </div>
               
-              <button 
-                onClick={handleLogin}
-                className="w-full flex items-center justify-center gap-3 py-4 px-6 bg-white border border-slate-200 rounded-2xl hover:bg-slate-50 transition-all font-medium shadow-sm active:scale-95"
-              >
-                <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />
-                গুগল দিয়ে লগইন করুন
-              </button>
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1">ইমেইল</label>
+                  <input 
+                    type="email"
+                    required
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-[#2b59c3] transition-all"
+                    placeholder="admin@example.com"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1">পাসওয়ার্ড</label>
+                  <input 
+                    type="password"
+                    required
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-[#2b59c3] transition-all"
+                    placeholder="••••••••"
+                  />
+                </div>
+                
+                {loginError && (
+                  <div className="p-3 bg-red-50 text-red-600 text-xs rounded-xl border border-red-100 flex items-center gap-2">
+                    <AlertCircle size={14} />
+                    {loginError}
+                  </div>
+                )}
+
+                <button 
+                  type="submit"
+                  disabled={isLoggingIn}
+                  className="w-full flex items-center justify-center gap-3 py-4 px-6 bg-[#2b59c3] text-white rounded-2xl hover:bg-[#1a237e] transition-all font-bold shadow-lg shadow-blue-100 active:scale-95 disabled:opacity-50"
+                >
+                  {isLoggingIn ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    <>
+                      <LogIn size={20} />
+                      লগইন করুন
+                    </>
+                  )}
+                </button>
+              </form>
               
               <p className="text-center text-xs text-slate-400 mt-8">
                 লগইন করার মাধ্যমে আপনি আমাদের শর্তাবলী মেনে নিচ্ছেন।
