@@ -104,8 +104,9 @@ interface Registration {
   createdAt: any;
 }
 
+const LOGO_URL = "https://ais-pre-baj7omvph2mebdvyu4dwuu-222100620520.asia-southeast1.run.app/api/v1/projects/baj7omvph2mebdvyu4dwuu/files/f9917540-3498-4674-89c0-6d8011218768";
+
 interface AppSettings {
-  logoUrl: string;
   reunionName: string;
   registrationOpen: boolean;
   guestFeeEnabled: boolean;
@@ -128,7 +129,6 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [settings, setSettings] = useState<AppSettings>({
-    logoUrl: "https://ais-pre-baj7omvph2mebdvyu4dwuu-222100620520.asia-southeast1.run.app/api/v1/projects/baj7omvph2mebdvyu4dwuu/files/f9917540-3498-4674-89c0-6d8011218768",
     reunionName: "মতিরহাট উচ্চ বিদ্যালয় রি-ইউনিয়ন ২০২৬",
     registrationOpen: true,
     guestFeeEnabled: true,
@@ -247,7 +247,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => setView('home')}>
             <img 
-              src={settings.logoUrl} 
+              src={LOGO_URL} 
               alt="Logo" 
               className="h-10 w-10 object-contain rounded-full shadow-sm"
               referrerPolicy="no-referrer"
@@ -419,7 +419,7 @@ function HeroSection({ settings }: { settings: AppSettings }) {
         className="relative z-10"
       >
         <img 
-          src={settings.logoUrl} 
+          src={LOGO_URL} 
           alt="Logo" 
           className="h-40 w-40 mx-auto mb-8 object-contain bg-white p-4 rounded-[2rem] shadow-2xl ring-4 ring-white/20"
           referrerPolicy="no-referrer"
@@ -582,7 +582,7 @@ function RegistrationForm({ settings }: { settings: AppSettings }) {
         <div className="bg-slate-50 px-8 py-6 border-b border-slate-100 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <img 
-              src={settings.logoUrl} 
+              src={LOGO_URL} 
               alt="Logo" 
               className="h-12 w-12 object-contain bg-white p-1 rounded-xl shadow-sm border border-slate-100"
               referrerPolicy="no-referrer"
@@ -1060,7 +1060,6 @@ function AdminDashboard({ settings }: { settings: AppSettings }) {
   const [selectedRegistrant, setSelectedRegistrant] = useState<Registration | null>(null);
 
   // Settings form state
-  const [newLogoUrl, setNewLogoUrl] = useState(settings.logoUrl);
   const [newName, setNewName] = useState(settings.reunionName);
   const [guestFeeEnabled, setGuestFeeEnabled] = useState(settings.guestFeeEnabled);
   const [guestFeeAmount, setGuestFeeAmount] = useState(settings.guestFeeAmount);
@@ -1072,27 +1071,12 @@ function AdminDashboard({ settings }: { settings: AppSettings }) {
   const [newEmail, setNewEmail] = useState('');
 
   useEffect(() => {
-    setNewLogoUrl(settings.logoUrl);
     setNewName(settings.reunionName);
     setGuestFeeEnabled(settings.guestFeeEnabled);
     setGuestFeeAmount(settings.guestFeeAmount);
     setAdminEmails(settings.adminEmails || [ADMIN_EMAIL]);
   }, [settings]);
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 500000) { // 500KB limit for base64 in Firestore
-        alert("ইমেজ সাইজ ৫০০KB এর নিচে হতে হবে।");
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setNewLogoUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   useEffect(() => {
     const fetchRegistrations = async () => {
@@ -1260,7 +1244,6 @@ function AdminDashboard({ settings }: { settings: AppSettings }) {
         .from('settings')
         .upsert({
           id: 'config',
-          logoUrl: newLogoUrl,
           reunionName: newName,
           guestFeeEnabled,
           guestFeeAmount: Number(guestFeeAmount),
@@ -1556,41 +1539,6 @@ function AdminDashboard({ settings }: { settings: AppSettings }) {
                   className="w-full px-5 py-3 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-[#2b59c3] transition-all font-bold disabled:opacity-50"
                   placeholder="৫০০"
                 />
-              </div>
-            </div>
-            
-            <div className="space-y-3">
-              <label className="text-sm font-black text-slate-700 ml-1">লোগো ইমেজ</label>
-              <div className="flex flex-col gap-4">
-                <input 
-                  type="file"
-                  accept="image/*"
-                  onChange={handleLogoUpload}
-                  className="w-full text-sm text-slate-500 file:mr-4 file:py-3 file:px-6 file:rounded-2xl file:border-0 file:text-sm file:font-black file:bg-blue-50 file:text-[#2b59c3] hover:file:bg-blue-100 cursor-pointer border border-slate-100 rounded-2xl p-2"
-                />
-                <div className="flex items-center gap-2">
-                  <div className="h-px bg-slate-100 flex-1" />
-                  <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">অথবা URL দিন</span>
-                  <div className="h-px bg-slate-100 flex-1" />
-                </div>
-                <input 
-                  type="text"
-                  value={newLogoUrl}
-                  onChange={(e) => setNewLogoUrl(e.target.value)}
-                  className="w-full px-5 py-3 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-[#2b59c3] transition-all font-bold text-xs"
-                  placeholder="লোগো ইমেজের লিংক দিন"
-                />
-              </div>
-              
-              <div className="mt-6 p-8 border-2 border-dashed border-slate-100 rounded-3xl flex flex-col items-center justify-center bg-slate-50/50">
-                <p className="text-xs font-black text-slate-400 mb-4 uppercase tracking-widest">লোগো প্রিভিউ</p>
-                {newLogoUrl ? (
-                  <img src={newLogoUrl} alt="Logo Preview" className="h-28 object-contain drop-shadow-xl" referrerPolicy="no-referrer" />
-                ) : (
-                  <div className="w-20 h-20 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-300">
-                    <ImageIcon size={32} />
-                  </div>
-                )}
               </div>
             </div>
             
