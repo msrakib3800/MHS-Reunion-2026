@@ -121,6 +121,8 @@ export default function App() {
   const [view, setView] = useState<'home' | 'admin'>('home');
   const [adminTab, setAdminTab] = useState<'registrations' | 'settings'>('registrations');
   const [showLogin, setShowLogin] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [settings, setSettings] = useState<AppSettings>({
     logoUrl: "https://ais-pre-baj7omvph2mebdvyu4dwuu-222100620520.asia-southeast1.run.app/api/v1/projects/baj7omvph2mebdvyu4dwuu/files/f9917540-3498-4674-89c0-6d8011218768",
     reunionName: "মতিরহাট উচ্চ বিদ্যালয় রি-ইউনিয়ন ২০২৬",
@@ -163,14 +165,23 @@ export default function App() {
 
   useEffect(() => {
     const fetchSettings = async () => {
-      const { data, error } = await supabase
-        .from('settings')
-        .select('*')
-        .eq('id', 'config')
-        .single();
-      
-      if (data) {
-        setSettings(data);
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('settings')
+          .select('*')
+          .eq('id', 'config')
+          .single();
+        
+        if (error) {
+          console.warn("Settings not found, using defaults:", error.message);
+        } else if (data) {
+          setSettings(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch settings:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -206,6 +217,17 @@ export default function App() {
     await supabase.auth.signOut();
     setView('home');
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-[#2b59c3] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-500 font-bold">লোড হচ্ছে...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
