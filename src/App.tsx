@@ -217,8 +217,8 @@ export default function App() {
       setLoginEmail('');
       setLoginPassword('');
     } catch (error: any) {
-      console.error("Login failed:", error);
-      setLoginError(error.message || "লগইন ব্যর্থ হয়েছে। অনুগ্রহ করে সঠিক তথ্য দিন।");
+      console.error("Auth failed:", error);
+      setLoginError(error.message || "ব্যর্থ হয়েছে। অনুগ্রহ করে সঠিক তথ্য দিন।");
     } finally {
       setIsLoggingIn(false);
     }
@@ -1067,6 +1067,9 @@ function AdminDashboard({ settings }: { settings: AppSettings }) {
   const [adminEmails, setAdminEmails] = useState<string[]>(settings.adminEmails || [ADMIN_EMAIL]);
   const [newAdminEmail, setNewAdminEmail] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isUpdatingSecurity, setIsUpdatingSecurity] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [newEmail, setNewEmail] = useState('');
 
   useEffect(() => {
     setNewLogoUrl(settings.logoUrl);
@@ -1270,6 +1273,27 @@ function AdminDashboard({ settings }: { settings: AppSettings }) {
       handleSupabaseError(error, OperationType.WRITE, 'settings/config');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const updateSecurity = async () => {
+    if (!newEmail && !newPassword) return;
+    setIsUpdatingSecurity(true);
+    try {
+      const updates: any = {};
+      if (newEmail) updates.email = newEmail;
+      if (newPassword) updates.password = newPassword;
+
+      const { error } = await supabase.auth.updateUser(updates);
+      if (error) throw error;
+      
+      alert("সিকিউরিটি সেটিংস সফলভাবে আপডেট করা হয়েছে!");
+      setNewEmail('');
+      setNewPassword('');
+    } catch (error: any) {
+      alert("আপডেট করতে সমস্যা হয়েছে: " + error.message);
+    } finally {
+      setIsUpdatingSecurity(false);
     }
   };
 
@@ -1610,13 +1634,55 @@ function AdminDashboard({ settings }: { settings: AppSettings }) {
                 </div>
               </div>
             </div>
+
+            <div className="h-px bg-slate-100 my-8" />
+
+            <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-red-50 text-red-600">
+                <AlertCircle size={20} />
+              </div>
+              সিকিউরিটি সেটিংস
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <label className="text-sm font-black text-slate-700 ml-1">লগইন ইমেইল পরিবর্তন</label>
+                <input 
+                  type="email"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  className="w-full px-5 py-3 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-red-500 transition-all font-bold text-sm"
+                  placeholder="নতুন লগইন ইমেইল"
+                />
+              </div>
+              <div className="space-y-3">
+                <label className="text-sm font-black text-slate-700 ml-1">পাসওয়ার্ড পরিবর্তন</label>
+                <input 
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-5 py-3 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-red-500 transition-all font-bold text-sm"
+                  placeholder="নতুন পাসওয়ার্ড"
+                />
+              </div>
+            </div>
+
+            <button 
+              onClick={updateSecurity}
+              disabled={isUpdatingSecurity || (!newEmail && !newPassword)}
+              className="w-full py-4 bg-red-600 text-white rounded-2xl font-black text-sm hover:bg-red-700 transition-all shadow-lg shadow-red-100 disabled:opacity-50"
+            >
+              {isUpdatingSecurity ? "আপডেট হচ্ছে..." : "লগইন তথ্য আপডেট করুন"}
+            </button>
+
+            <div className="h-px bg-slate-100 my-8" />
             
             <button 
               onClick={saveSettings}
               disabled={isSaving}
               className="w-full py-5 bg-gradient-to-r from-[#2b59c3] to-[#1a237e] text-white rounded-2xl font-black text-xl hover:shadow-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-blue-100 disabled:opacity-50 disabled:scale-100"
             >
-              {isSaving ? "সেভ হচ্ছে..." : "সেটিংস সেভ করুন"}
+              {isSaving ? "সেভ হচ্ছে..." : "অ্যাপ সেটিংস সেভ করুন"}
             </button>
           </div>
         </div>
