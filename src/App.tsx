@@ -430,9 +430,9 @@ function HeroSection({ settings }: { settings: AppSettings }) {
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.6 }}
-        className="text-4xl md:text-6xl font-black mb-6 tracking-tight drop-shadow-lg"
+        className="text-5xl md:text-7xl font-black mb-8 tracking-tight drop-shadow-2xl"
       >
-        {settings.reunionName}
+        মতিরহাট উচ্চ বিদ্যালয় <br className="md:hidden" /> রি-ইউনিয়ন ২০২৬
       </motion.h2>
       <motion.p 
         initial={{ y: 20, opacity: 0 }}
