@@ -104,7 +104,7 @@ interface Registration {
   createdAt: any;
 }
 
-const LOGO_URL = "https://ais-pre-baj7omvph2mebdvyu4dwuu-222100620520.asia-southeast1.run.app/api/v1/projects/baj7omvph2mebdvyu4dwuu/files/f9917540-3498-4674-89c0-6d8011218768";
+const LOGO_URL = "https://img.icons8.com/color/144/school.png"; // আপাতত একটি ডামি লোগো, আপনি আপনার লোগোর লিঙ্ক এখানে দিতে পারেন
 
 interface AppSettings {
   reunionName: string;
@@ -246,12 +246,17 @@ export default function App() {
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 py-3">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => setView('home')}>
-            <img 
-              src={LOGO_URL} 
-              alt="Logo" 
-              className="h-10 w-10 object-contain rounded-full shadow-sm"
-              referrerPolicy="no-referrer"
-            />
+            <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center shadow-sm overflow-hidden border border-slate-100">
+              <img 
+                src={LOGO_URL} 
+                alt="Logo" 
+                className="h-full w-full object-contain"
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "https://img.icons8.com/color/48/school.png";
+                }}
+              />
+            </div>
             <h1 className="font-black text-lg md:text-xl text-[#2b59c3] hidden sm:block">
               {settings.reunionName}
             </h1>
@@ -418,12 +423,17 @@ function HeroSection({ settings }: { settings: AppSettings }) {
         transition={{ type: "spring", stiffness: 100 }}
         className="relative z-10"
       >
-        <img 
-          src={LOGO_URL} 
-          alt="Logo" 
-          className="h-40 w-40 mx-auto mb-8 object-contain bg-white p-4 rounded-[2rem] shadow-2xl ring-4 ring-white/20"
-          referrerPolicy="no-referrer"
-        />
+        <div className="h-40 w-40 mx-auto mb-8 bg-white p-4 rounded-[2rem] shadow-2xl ring-4 ring-white/20 flex items-center justify-center overflow-hidden">
+          <img 
+            src={LOGO_URL} 
+            alt="Logo" 
+            className="h-full w-full object-contain"
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = "https://img.icons8.com/color/144/school.png";
+            }}
+          />
+        </div>
       </motion.div>
       
       <motion.h2 
