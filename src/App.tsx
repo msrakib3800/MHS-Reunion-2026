@@ -459,6 +459,7 @@ function HeroSection({ settings }: { settings: AppSettings }) {
 function RegistrationForm({ settings }: { settings: AppSettings }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [submittedData, setSubmittedData] = useState<any>(null);
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm();
   
@@ -481,6 +482,7 @@ function RegistrationForm({ settings }: { settings: AppSettings }) {
 
   const onSubmit = async (data: any) => {
     setIsSubmitting(true);
+    setSubmitError(null);
     try {
       const registrationData = {
         ...data,
@@ -516,8 +518,10 @@ function RegistrationForm({ settings }: { settings: AppSettings }) {
 
       setIsSuccess(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (error) {
-      handleSupabaseError(error, OperationType.CREATE, 'registrations');
+    } catch (error: any) {
+      console.error("Registration Error:", error);
+      setSubmitError(error?.message || "রেজিস্ট্রেশন করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।");
+      // handleSupabaseError(error, OperationType.CREATE, 'registrations'); // Removed to avoid double throwing
     } finally {
       setIsSubmitting(false);
     }
@@ -622,6 +626,7 @@ function RegistrationForm({ settings }: { settings: AppSettings }) {
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#2b59c3] focus:border-transparent outline-none transition-all"
                 placeholder="পিতার নাম লিখুন"
               />
+              {errors.fatherName && <span className="text-[#e91e63] text-xs mt-1">পিতার নাম আবশ্যক</span>}
             </FormField>
 
             <FormField label="বর্তমান ঠিকানা" icon={<MapPin size={18} className="text-[#2b59c3]" />} className="md:col-span-2">
@@ -630,6 +635,7 @@ function RegistrationForm({ settings }: { settings: AppSettings }) {
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#2b59c3] focus:border-transparent outline-none transition-all min-h-[100px]"
                 placeholder="আপনার বর্তমান ঠিকানা"
               />
+              {errors.address && <span className="text-[#e91e63] text-xs mt-1">ঠিকানা আবশ্যক</span>}
             </FormField>
 
             <FormField label="লিঙ্গ" icon={<UserIcon size={18} className="text-[#2b59c3]" />}>
@@ -642,6 +648,7 @@ function RegistrationForm({ settings }: { settings: AppSettings }) {
                 <option value="Female">মহিলা</option>
                 <option value="Other">অন্যান্য</option>
               </select>
+              {errors.gender && <span className="text-[#e91e63] text-xs mt-1">লিঙ্গ নির্বাচন করুন</span>}
             </FormField>
 
             <FormField label="এসএসসি ব্যাচ" icon={<Calendar size={18} className="text-[#2b59c3]" />}>
@@ -654,6 +661,7 @@ function RegistrationForm({ settings }: { settings: AppSettings }) {
                   <option key={year} value={year}>{year}</option>
                 ))}
               </select>
+              {errors.sscBatch && <span className="text-[#e91e63] text-xs mt-1">ব্যাচ আবশ্যক</span>}
             </FormField>
 
             <FormField label="ইমেইল" icon={<Mail size={18} className="text-[#2b59c3]" />}>
@@ -663,6 +671,7 @@ function RegistrationForm({ settings }: { settings: AppSettings }) {
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#2b59c3] focus:border-transparent outline-none transition-all"
                 placeholder="example@mail.com"
               />
+              {errors.email && <span className="text-[#e91e63] text-xs mt-1">সঠিক ইমেইল আবশ্যক</span>}
             </FormField>
 
             <FormField label="ফোন নম্বর" icon={<Phone size={18} className="text-[#2b59c3]" />}>
@@ -671,6 +680,7 @@ function RegistrationForm({ settings }: { settings: AppSettings }) {
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#2b59c3] focus:border-transparent outline-none transition-all"
                 placeholder="০১XXXXXXXXX"
               />
+              {errors.phone && <span className="text-[#e91e63] text-xs mt-1">ফোন নম্বর আবশ্যক</span>}
             </FormField>
 
             <FormField label="ফেসবুক প্রোফাইল লিংক" icon={<Facebook size={18} className="text-[#2b59c3]" />}>
@@ -720,6 +730,7 @@ function RegistrationForm({ settings }: { settings: AppSettings }) {
                   <option key={size} value={size}>{size}</option>
                 ))}
               </select>
+              {errors.tshirtSize && <span className="text-[#e91e63] text-xs mt-1">সাইজ আবশ্যক</span>}
             </FormField>
 
             <FormField label="ছবি আপলোড" icon={<Upload size={18} className="text-[#2b59c3]" />}>
@@ -756,6 +767,13 @@ function RegistrationForm({ settings }: { settings: AppSettings }) {
               ৳ {calculatedFee}
             </div>
           </div>
+
+          {submitError && (
+            <div className="p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3 text-red-600 text-sm animate-shake">
+              <AlertCircle size={20} />
+              <p className="font-bold">{submitError}</p>
+            </div>
+          )}
 
           <button 
             disabled={isSubmitting}
